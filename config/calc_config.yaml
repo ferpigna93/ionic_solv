@@ -1,0 +1,104 @@
+# ============================================================
+# ionic_solv — default calculation configuration
+# ============================================================
+# All parameters can be overridden on the command line or in
+# a per-project YAML that is loaded on top of this file.
+
+# -----------------------------------------------------------
+# System resources (adapt to your HPC partition)
+# -----------------------------------------------------------
+resources:
+  nproc: 8
+  mem: "16GB"
+  time: "24:00:00"          # SLURM wall-time
+  partition: "normal"
+  account: ""               # leave empty if not required
+
+# -----------------------------------------------------------
+# Electronic structure method
+# -----------------------------------------------------------
+method:
+  # Good general-purpose choices for ionic solvation:
+  #   B3LYP/6-311+G(d,p)   — fast, widely benchmarked
+  #   M06-2X/6-311+G(d,p)  — better for non-covalent interactions
+  #   ωB97X-D/6-311+G(d,p) — dispersion corrected, recommended
+  functional: "B3LYP"
+  basis_set: "6-311+G(d,p)"
+
+  # Optional single-point correction on top of opt geometry
+  # (leave empty to skip)
+  sp_functional: ""         # e.g. "DLPNO-CCSD(T)" (ORCA), "MP2"
+  sp_basis_set: ""          # e.g. "aug-cc-pVTZ"
+
+  # Extra route keywords appended verbatim (e.g. "EmpiricalDispersion=GD3BJ")
+  extra_keywords: ""
+
+# -----------------------------------------------------------
+# Geometry optimization settings
+# -----------------------------------------------------------
+optimization:
+  enabled: true
+  keyword: "Opt"            # e.g. "Opt=(MaxCycles=100)"
+  convergence: "default"    # "default" | "tight" | "verytight"
+
+# -----------------------------------------------------------
+# Frequency calculation (required for thermal corrections)
+# -----------------------------------------------------------
+frequency:
+  enabled: true
+  keyword: "Freq=NoRaman"
+  temperature: 298.15       # Kelvin
+  pressure: 1.0             # atm
+
+# -----------------------------------------------------------
+# Solvation model
+# -----------------------------------------------------------
+solvation:
+  # model: "SMD"  ← recommended for absolute solvation free energies
+  #        "IEFPCM" | "CPCM"  ← alternatives
+  model: "SMD"
+  solvent: "Water"
+
+  # Standard-state correction from 1 atm (gas) → 1 mol/L (solution)
+  # ΔG°_ss = RT·ln(RT/PV) = 1.89 kcal/mol at 298.15 K
+  apply_standard_state_correction: true
+  standard_state_correction_kcal: 1.89
+
+# -----------------------------------------------------------
+# Cluster-continuum approach
+# -----------------------------------------------------------
+cluster_continuum:
+  enabled: false            # set true to use cluster+continuum workflow
+  n_water: [1, 2, 3, 4]    # number of explicit water molecules to include
+  conformers_per_n: 5       # random conformers to generate per (ion, n)
+  # Free energy of water vaporization at 298.15 K (kcal/mol)
+  # H2O(l) → H2O(g),  ΔG°_vap = +6.32 kcal/mol
+  delta_G_vap_water: 6.32
+
+# -----------------------------------------------------------
+# Reference experimental solvation energies (kcal/mol)
+# Source: Marcus 1991, Fawcett 2004, Tissandier 1998
+# Used for benchmarking / comparison in post-processing
+# -----------------------------------------------------------
+experimental_reference:
+  "Li+":  -113.5
+  "Na+":   -87.2
+  "K+":    -70.5
+  "Rb+":   -65.7
+  "Cs+":   -59.8
+  "Mg2+": -455.5
+  "Ca2+": -380.8
+  "F-":   -111.1
+  "Cl-":   -74.9
+  "Br-":   -67.8
+  "I-":    -57.8
+  "OH-":  -105.0
+
+# -----------------------------------------------------------
+# Output / reporting
+# -----------------------------------------------------------
+output:
+  units: "kcal/mol"         # "kcal/mol" | "kJ/mol" | "eV" | "hartree"
+  create_summary_csv: true
+  create_plots: true
+  log_level: "INFO"         # "DEBUG" | "INFO" | "WARNING"
