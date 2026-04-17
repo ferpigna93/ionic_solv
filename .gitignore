@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Generated job directories (user output, not source)
+test_clusters/
+test_jobs/
+gaussian_inputs/
+cluster_inputs/
+jobs/
+ref_jobs/
+
+# Gaussian scratch / output (large binary files)
+*.chk
+*.fchk
+*.rwf
+*.d2e
+*.int
+*.skr
+
+# Logs and results that aren't examples
+*.log
+*.csv
+!examples/**
+
+# Editor / OS
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/

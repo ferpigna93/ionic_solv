@@ -59,11 +59,13 @@ import logging
 import math
 import textwrap
 from dataclasses import dataclass
+import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from post_processing.parse_gaussian import GaussianResult, parse_log, parse_directory
 
 logger = logging.getLogger(__name__)
