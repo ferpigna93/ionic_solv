@@ -15,8 +15,8 @@ venv/
 env/
 
 # Generated job directories (user output, not source)
-test_clusters/
-test_jobs/
+test_clusters*/
+test_jobs*/
 gaussian_inputs/
 cluster_inputs/
 jobs/
