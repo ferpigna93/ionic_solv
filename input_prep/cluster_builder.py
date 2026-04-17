@@ -27,11 +27,13 @@ import argparse
 import math
 import random
 import textwrap
+import sys
 from pathlib import Path
 from typing import List, Tuple
 
 import numpy as np
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from input_prep.generate_inputs import CalcConfig, GaussianInputGenerator, _sanitize
 
 # ---------------------------------------------------------------------------
