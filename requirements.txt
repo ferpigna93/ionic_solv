@@ -4,3 +4,9 @@ scipy>=1.10.0
 PyYAML>=6.0
 pandas>=2.0.0
 matplotlib>=3.7.0
+
+# Optional: visualization (utils/visualize.py)
+# Install manually if needed:
+#   conda install -c conda-forge rdkit
+#   pip install nglview ipywidgets
+#   jupyter nbextension enable --py --sys-prefix nglview

@@ -352,6 +352,16 @@ def read_xyz(path: Path) -> List[Tuple[str, float, float, float]]:
 # Batch generation
 # ---------------------------------------------------------------------------
 
+def _launch_viewer(xyz_paths: List[Path], charge: int, html_out: Path) -> None:
+    """Save an HTML viewer for a list of XYZ files (non-Jupyter fallback)."""
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+        from utils.visualize import show_cluster_grid
+        show_cluster_grid(xyz_paths, charge=charge, html_output=html_out)
+    except Exception as exc:
+        print(f"  [visualize] Could not generate viewer: {exc}")
+
+
 def generate_clusters(
     ion_xyz: Path,
     charge: int,
@@ -362,6 +372,7 @@ def generate_clusters(
     outdir: Path,
     ion_o_dist: Optional[float] = None,
     o_toward_ion: bool = True,
+    visualize: bool = False,
 ) -> None:
     """Generate XYZ + Gaussian .com files for each (n_water, conformer) pair.
 
@@ -379,6 +390,8 @@ def generate_clusters(
 
     for n in n_water_list:
         print(f"\n  n={n} ({orientation}, Thomson-optimal O placement):")
+        xyz_written: List[Path] = []
+
         for conf in range(n_conformers):
             label = f"{stem}_n{n}_conf{conf}"
             job_dir = outdir / label
@@ -397,11 +410,15 @@ def generate_clusters(
             xyz_out = job_dir / f"{label}_cluster.xyz"
             write_xyz(cluster, xyz_out,
                       comment=f"{stem}+{n}H2O conf{conf} | d_min={d_min:.2f}A Thomson")
+            xyz_written.append(xyz_out)
 
             gen.write_all(xyz_path=xyz_out, charge=charge, mult=mult,
                           outdir=job_dir, name=label)
 
             print(f"    conf{conf}: d_min={d_min:.2f} Å ({pair})  → {job_dir.name}/")
+
+        if visualize and xyz_written:
+            _launch_viewer(xyz_written, charge, outdir / f"{stem}_n{n}_viewer.html")
 
 
 # ---------------------------------------------------------------------------
@@ -439,6 +456,15 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--mem", default=None)
     p.add_argument("--solvent", default=None)
     p.add_argument("-o", "--outdir", default="cluster_inputs")
+    p.add_argument(
+        "--view", action="store_true",
+        help=(
+            "Generate an HTML viewer for each n after building clusters. "
+            "In Jupyter: returns nglview widgets. "
+            "In CLI: saves <stem>_n<N>_viewer.html (requires rdkit + nglview "
+            "for Jupyter; only needs the built-in 3Dmol.js CDN for CLI HTML)."
+        ),
+    )
     return p.parse_args()
 
 
@@ -468,6 +494,7 @@ def main() -> None:
         outdir=outdir,
         ion_o_dist=args.ion_o_dist,
         o_toward_ion=not args.anion,
+        visualize=args.view,
     )
     print(f"\nDone → {outdir}/")
 
