@@ -19,11 +19,11 @@ resources:
 # -----------------------------------------------------------
 method:
   # Good general-purpose choices for ionic solvation:
-  #   B3LYP/6-311+G(d,p)   — fast, widely benchmarked
-  #   M06-2X/6-311+G(d,p)  — better for non-covalent interactions
-  #   ωB97X-D/6-311+G(d,p) — dispersion corrected, recommended
+  #   B3LYP/def2TZVP        — default; good accuracy for ionic systems
+  #   M06-2X/def2TZVP       — better for non-covalent interactions
+  #   ωB97X-D/aug-cc-pVTZ   — dispersion corrected, highest accuracy
   functional: "B3LYP"
-  basis_set: "6-311+G(d,p)"
+  basis_set: "def2TZVP"
 
   # Optional single-point correction on top of opt geometry
   # (leave empty to skip)
@@ -38,8 +38,9 @@ method:
 # -----------------------------------------------------------
 optimization:
   enabled: true
-  keyword: "Opt"            # e.g. "Opt=(MaxCycles=100)"
-  convergence: "default"    # "default" | "tight" | "verytight"
+  keyword: "Opt=ModRedundant"   # ModRedundant allows freezing atoms via "1 F" below
+  convergence: "default"        # "default" | "tight" | "verytight"
+  freeze_ion: true              # add "1 F" to freeze the central ion (atom 1)
 
 # -----------------------------------------------------------
 # Frequency calculation (required for thermal corrections)

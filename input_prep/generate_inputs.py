@@ -66,7 +66,7 @@ SUPPORTED_MODELS = {"SMD", "IEFPCM", "CPCM"}
 @dataclass
 class CalcConfig:
     functional: str = "B3LYP"
-    basis_set: str = "6-311+G(d,p)"
+    basis_set: str = "def2TZVP"
     nproc: int = 8
     mem: str = "16GB"
     solvent: str = "Water"
@@ -74,9 +74,10 @@ class CalcConfig:
     temperature: float = 298.15
     pressure: float = 1.0
     extra_keywords: str = ""
-    opt_keyword: str = "Opt"
+    opt_keyword: str = "Opt=ModRedundant"
     freq_keyword: str = "Freq=NoRaman"
     apply_ss_correction: bool = True
+    freeze_ion: bool = True   # fix atom 1 (the ion) during optimisation
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> "CalcConfig":
@@ -100,6 +101,7 @@ class CalcConfig:
             opt_keyword=o.get("keyword", cls.opt_keyword),
             freq_keyword=f.get("keyword", cls.freq_keyword),
             apply_ss_correction=s.get("apply_standard_state_correction", cls.apply_ss_correction),
+            freeze_ion=o.get("freeze_ion", cls.freeze_ion),
         )
 
 
@@ -302,7 +304,10 @@ class GaussianInputGenerator:
         if coords:
             for sym, x, y, z in coords:
                 parts.append(f" {sym:<3s}  {x:>14.8f}  {y:>14.8f}  {z:>14.8f}")
-        parts.extend(["", ""])   # trailing blank lines required by Gaussian
+        if self.cfg.freeze_ion and "ModRedundant" in route and coords:
+            parts.append("")      # blank line before ModRedundant section
+            parts.append("1 F")  # freeze atom 1 (the ion)
+        parts.extend(["", ""])   # two trailing blank lines required by Gaussian
         return "\n".join(parts)
 
 
